@@ -8,6 +8,9 @@ import sitemap._
 import Loc._
 import net.liftmodules.JQueryModule
 import net.liftweb.http.js.jquery._
+import javax.mail.internet.{MimeMessage, MimeMultipart}
+import util.Mailer
+import javax.mail.Message.RecipientType
 
 
 /**
@@ -24,6 +27,7 @@ class Boot extends Loggable {
     val entries = List(
       Menu.i("Home") / "index", // the simple way to declare a menu
 
+      Menu.i("Send Plain Text") / "plaintext",
 
       // more complex because this menu allows anything in the
       // /static path to be visible
@@ -53,6 +57,29 @@ class Boot extends Loggable {
     LiftRules.jsArtifacts = JQueryArtifacts
     JQueryModule.InitParam.JQuery=JQueryModule.JQuery172
     JQueryModule.init()
+
+    def display(m: MimeMessage) : String = {
+
+      def from = "From: "+m.getFrom.map(_.toString).mkString(",")
+
+      def to = for {
+        rt <- List(RecipientType.TO, RecipientType.CC, RecipientType.BCC)
+        address <- Option(m.getRecipients(rt)) getOrElse Array()
+      } yield rt.toString + ": " + address.toString
+
+      def subj = "Subject: "+m.getSubject
+
+      def body = m.getContent.toString
+
+      val nl = System.getProperty("line.separator")
+
+      List(from, to.mkString(nl), subj, body) mkString nl
+
+    }
+
+    Mailer.devModeSend.default.set( (m: MimeMessage) =>
+      logger.info("Would have sent: "+display(m))
+    )
 
   }
 }
