@@ -3,12 +3,14 @@
   <head><meta content="text/html; charset=UTF-8" http-equiv="content-type" /><title>Home</title></head>
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
-     <h1>Plain text email send</h1>
+     <h1>Email with attachment</h1>
       <p>
         Check your console logs: Boot.scala is configured to
         just log email rather than send it.
        </p>
-       <div data-lift="PlainTextEmailSnippet">sent?</div>
+       <div>Email with CSV attachment: <span data-lift="EmailWithAttachmentSnippet">sent?</span></div>
+       <div>Email with image inline: <span data-lift="EmailWithAttachmentSnippet.sendAsInline">sent?</span></div>
+       <div>Email with image attached: <span data-lift="EmailWithAttachmentSnippet.sendAsAttachment">sent?</span></div>
     </div>
   </body>
 </html>

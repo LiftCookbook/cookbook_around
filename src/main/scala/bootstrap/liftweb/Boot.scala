@@ -9,7 +9,7 @@ import Loc._
 import net.liftmodules.JQueryModule
 import net.liftweb.http.js.jquery._
 import javax.mail.internet.{MimeMessage, MimeMultipart}
-import util.Mailer
+import util.{Props, Mailer}
 import javax.mail.Message.RecipientType
 
 
@@ -27,7 +27,10 @@ class Boot extends Loggable {
     val entries = List(
       Menu.i("Home") / "index", // the simple way to declare a menu
 
-      Menu.i("Send Plain Text") / "plaintext",
+      Menu.i("Send Text Email") / "plaintext",
+      Menu.i("Send HTML Email") / "htmlemail",
+      Menu.i("Send Email with Attachment") / "attachment",
+
 
       // more complex because this menu allows anything in the
       // /static path to be visible
@@ -37,7 +40,7 @@ class Boot extends Loggable {
     // set the sitemap.  Note if you don't want access control for
     // each page, just comment this line out.
     LiftRules.setSiteMap(SiteMap(entries:_*))
-
+//
     //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =
       Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
@@ -58,28 +61,46 @@ class Boot extends Loggable {
     JQueryModule.InitParam.JQuery=JQueryModule.JQuery172
     JQueryModule.init()
 
+    import net.liftweb.util.Mailer
+    import javax.mail.{Authenticator,PasswordAuthentication}
+
+    Mailer.authenticator = for {
+      user <- Props.get("mail.user")
+      pass <- Props.get("mail.password")
+    } yield new Authenticator {
+        override def getPasswordAuthentication =
+          new PasswordAuthentication(user,pass)
+      }
+
+
     def display(m: MimeMessage) : String = {
+      val nl = System.getProperty("line.separator")
 
-      def from = "From: "+m.getFrom.map(_.toString).mkString(",")
+      val from = "From: "+m.getFrom.map(_.toString).mkString(",")
 
-      def to = for {
+      val to = for {
         rt <- List(RecipientType.TO, RecipientType.CC, RecipientType.BCC)
         address <- Option(m.getRecipients(rt)) getOrElse Array()
       } yield rt.toString + ": " + address.toString
 
-      def subj = "Subject: "+m.getSubject
+      val subj = "Subject: "+m.getSubject
 
-      def body = m.getContent.toString
+      def parts(mm: MimeMultipart) = (0 until mm.getCount).map(mm.getBodyPart)
 
-      val nl = System.getProperty("line.separator")
+      val body = m.getContent match {
+        case mm: MimeMultipart =>
+          val bodyParts = for (part <- parts(mm)) yield part.getContent.toString
+          bodyParts.mkString(nl)
+
+        case otherwise => otherwise.toString
+      }
 
       List(from, to.mkString(nl), subj, body) mkString nl
-
     }
 
-    Mailer.devModeSend.default.set( (m: MimeMessage) =>
-      logger.info("Would have sent: "+display(m))
-    )
+//    Mailer.devModeSend.default.set( (m: MimeMessage) =>
+//      logger.info("Would have sent: "+display(m))
+//    )
 
   }
 }
