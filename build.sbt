@@ -29,5 +29,9 @@ libraryDependencies ++= {
   )
 }
 
+libraryDependencies += "net.databinder.dispatch" %% "dispatch-core" % "0.9.5"
+
+libraryDependencies += "net.databinder.dispatch" %% "dispatch-jsoup" % "0.9.5"
+
 
 

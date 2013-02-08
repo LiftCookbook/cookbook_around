@@ -1,3 +1,8 @@
+<!--
+ This configuration file is used by IDEs: it is picked up by the regular class loader in situations where
+ the Lift logger has not been initialised, e.g., because you're not calling Boot
+ -->
+
 <configuration>
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -7,7 +12,9 @@
     </encoder>
   </appender>
 
-  <root level="INFO">
+   <logger name="com.ning.http.client" level="WARN"/>
+
+    <root level="DEBUG">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

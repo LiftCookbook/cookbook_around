@@ -30,8 +30,6 @@ class Boot extends Loggable {
       Menu.i("Send Text Email") / "plaintext",
       Menu.i("Send HTML Email") / "htmlemail",
       Menu.i("Send Email with Attachment") / "attachment",
-      Menu.i("Fetch URL") / "fetchurl",
-
 
       // more complex because this menu allows anything in the
       // /static path to be visible
