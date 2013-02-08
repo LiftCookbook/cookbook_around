@@ -1,0 +1,23 @@
+# The email examples in this project use these
+# email addresses to send.  Change them!
+default.to=them@example.org
+alt.to=other@example.org
+default.from=you@example.org
+
+
+
+# For SMTP authentication:
+
+#mail.smtp.auth=true
+#mail.user=me@example.org
+#mail.password=correct horse battery staple
+#mail.smtp.host=smtp.sendgrid.net
+
+# ...but remember this project's Boot has dev mode set
+# to just log email unless you change that.
+
+
+# Uncomment to enable verbose low-level logging:
+#mail.debug=true
+
+

@@ -9,7 +9,7 @@ import Loc._
 import net.liftmodules.JQueryModule
 import net.liftweb.http.js.jquery._
 import javax.mail.internet.{MimeMessage, MimeMultipart}
-import util.{Props, Mailer}
+import util.Props
 import javax.mail.Message.RecipientType
 
 
@@ -30,17 +30,18 @@ class Boot extends Loggable {
       Menu.i("Send Text Email") / "plaintext",
       Menu.i("Send HTML Email") / "htmlemail",
       Menu.i("Send Email with Attachment") / "attachment",
+      Menu.i("Fetch URL") / "fetchurl",
 
 
       // more complex because this menu allows anything in the
       // /static path to be visible
       Menu(Loc("Static", Link(List("static"), true, "/static/index"),
-	       "Static Content")))
+        "Static Content")))
 
     // set the sitemap.  Note if you don't want access control for
     // each page, just comment this line out.
-    LiftRules.setSiteMap(SiteMap(entries:_*))
-//
+    LiftRules.setSiteMap(SiteMap(entries: _*))
+    //
     //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =
       Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
@@ -58,32 +59,32 @@ class Boot extends Loggable {
 
     //Init the jQuery module, see http://liftweb.net/jquery for more information.
     LiftRules.jsArtifacts = JQueryArtifacts
-    JQueryModule.InitParam.JQuery=JQueryModule.JQuery172
+    JQueryModule.InitParam.JQuery = JQueryModule.JQuery172
     JQueryModule.init()
 
     import net.liftweb.util.Mailer
-    import javax.mail.{Authenticator,PasswordAuthentication}
+    import javax.mail.{Authenticator, PasswordAuthentication}
 
     Mailer.authenticator = for {
       user <- Props.get("mail.user")
       pass <- Props.get("mail.password")
     } yield new Authenticator {
         override def getPasswordAuthentication =
-          new PasswordAuthentication(user,pass)
+          new PasswordAuthentication(user, pass)
       }
 
 
-    def display(m: MimeMessage) : String = {
+    def display(m: MimeMessage): String = {
       val nl = System.getProperty("line.separator")
 
-      val from = "From: "+m.getFrom.map(_.toString).mkString(",")
+      val from = "From: " + m.getFrom.map(_.toString).mkString(",")
 
       val to = for {
         rt <- List(RecipientType.TO, RecipientType.CC, RecipientType.BCC)
         address <- Option(m.getRecipients(rt)) getOrElse Array()
       } yield rt.toString + ": " + address.toString
 
-      val subj = "Subject: "+m.getSubject
+      val subj = "Subject: " + m.getSubject
 
       def parts(mm: MimeMultipart) = (0 until mm.getCount).map(mm.getBodyPart)
 
@@ -98,9 +99,10 @@ class Boot extends Loggable {
       List(from, to.mkString(nl), subj, body) mkString nl
     }
 
-//    Mailer.devModeSend.default.set( (m: MimeMessage) =>
-//      logger.info("Would have sent: "+display(m))
-//    )
+    // Comment out if you want to send email during dev mode:
+    Mailer.devModeSend.default.set((m: MimeMessage) =>
+      logger.info("Would have sent: " + display(m))
+    )
 
   }
 }
